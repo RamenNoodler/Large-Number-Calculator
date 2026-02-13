@@ -138,8 +138,45 @@ function getScaleName(index) {
     return realScales[index];
   }
 
-  return index + "-illion";
+  const units = [
+    "", "un", "duo", "tre", "quattuor",
+    "quin", "sex", "septen", "octo", "novem"
+  ];
+
+  const tens = [
+    "", "dec", "vigint", "trigint", "quadragint",
+    "quinquagint", "sexagint", "septuagint",
+    "octogint", "nonagint"
+  ];
+
+  const hundreds = [
+    "", "cent", "ducent", "trecent",
+    "quadringent", "quingent",
+    "sescent", "septingent",
+    "octingent", "nongent"
+  ];
+
+  let name = "";
+  let n = index;
+
+  while (n > 0) {
+
+    let u = n % 10;
+    let t = Math.floor(n / 10) % 10;
+    let h = Math.floor(n / 100) % 10;
+
+    name =
+      units[u] +
+      tens[t] +
+      hundreds[h] +
+      name;
+
+    n = Math.floor(n / 1000);
+  }
+
+  return name + "illion";
 }
+
 // --- MAIN CONVERT ---
 function convert() {
 
