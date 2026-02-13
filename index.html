@@ -134,9 +134,13 @@ function convertHundreds(num) {
 // --- INFINITE SCALE GENERATOR ---
 function getScaleName(index) {
 
-  if (index < realScales.length) {
-    return realScales[index];
-  }
+  // thousand & million are special
+  if (index === 0) return "";
+  if (index === 1) return "thousand";
+  if (index === 2) return "million";
+
+  // Conway–Guy index system
+  let n = index - 1;
 
   const units = [
     "", "un", "duo", "tre", "quattuor",
@@ -144,8 +148,9 @@ function getScaleName(index) {
   ];
 
   const tens = [
-    "", "dec", "vigint", "trigint", "quadragint",
-    "quinquagint", "sexagint", "septuagint",
+    "", "dec", "vigint", "trigint",
+    "quadragint", "quinquagint",
+    "sexagint", "septuagint",
     "octogint", "nonagint"
   ];
 
@@ -157,13 +162,13 @@ function getScaleName(index) {
   ];
 
   let name = "";
-  let n = index;
+  let remaining = n;
 
-  while (n > 0) {
+  while (remaining > 0) {
 
-    let u = n % 10;
-    let t = Math.floor(n / 10) % 10;
-    let h = Math.floor(n / 100) % 10;
+    let u = remaining % 10;
+    let t = Math.floor(remaining / 10) % 10;
+    let h = Math.floor(remaining / 100) % 10;
 
     name =
       units[u] +
@@ -171,11 +176,12 @@ function getScaleName(index) {
       hundreds[h] +
       name;
 
-    n = Math.floor(n / 1000);
+    remaining = Math.floor(remaining / 1000);
   }
 
   return name + "illion";
 }
+
 
 // --- MAIN CONVERT ---
 function convert() {
