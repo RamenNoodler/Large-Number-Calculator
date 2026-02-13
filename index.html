@@ -1,84 +1,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Number to Words Converter</title>
+  <title>Infinite Number Name Generator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial;
+      background: #0e0e0e;
+      color: white;
       text-align: center;
-      padding: 50px;
-      background: #f4f4f4;
+      padding: 40px;
     }
 
     input {
-      width: 400px;
-      padding: 10px;
+      width: 600px;
+      padding: 12px;
       font-size: 18px;
+      border-radius: 8px;
+      border: none;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 25px;
       font-size: 18px;
       margin-left: 10px;
       cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      background: #4CAF50;
+      color: white;
     }
 
     #result {
-      margin-top: 30px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #333;
+      margin-top: 40px;
+      font-size: 20px;
+      max-width: 1000px;
+      margin: auto;
+      word-wrap: break-word;
     }
   </style>
 </head>
 <body>
 
-  <h1>Number to Words Converter</h1>
+<h1>Infinite Number Name Generator</h1>
 
-  <input type="text" id="numberInput" placeholder="Enter a number">
-  <button onclick="convert()">Convert</button>
+<input type="text" id="numberInput" placeholder="Enter a VERY large number">
+<button onclick="convert()">Convert</button>
 
-  <div id="result"></div>
+<div id="result"></div>
 
-  <script>
-    const scales = [
-      "", "thousand", "million", "billion", "trillion",
-      "quadrillion", "quintillion", "sextillion",
-      "septillion", "octillion", "nonillion", "decillion"
-    ];
+<script>
 
-    function convert() {
-      let num = document.getElementById("numberInput").value.trim();
+const ones = ["","one","two","three","four","five","six","seven","eight","nine"];
+const teens = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
 
-      if (!/^\d+$/.test(num)) {
-        document.getElementById("result").innerText = "Please enter a valid whole number.";
-        return;
-      }
+function convertHundreds(num) {
+  let result = "";
 
-      if (num === "0") {
-        document.getElementById("result").innerText = "zero";
-        return;
-      }
+  if (num >= 100) {
+    result += ones[Math.floor(num/100)] + " hundred ";
+    num %= 100;
+  }
 
-      let chunks = [];
-      while (num.length > 0) {
-        chunks.unshift(num.slice(-3));
-        num = num.slice(0, -3);
-      }
+  if (num >= 20) {
+    result += tens[Math.floor(num/10)] + " ";
+    num %= 10;
+  } else if (num >= 10) {
+    result += teens[num-10] + " ";
+    return result;
+  }
 
-      let words = [];
+  if (num > 0) result += ones[num] + " ";
 
-      for (let i = 0; i < chunks.length; i++) {
-        let chunk = parseInt(chunks[i]);
-        if (chunk !== 0) {
-          let scaleIndex = chunks.length - 1 - i;
-          words.push(chunk + " " + scales[scaleIndex]);
-        }
-      }
+  return result;
+}
 
-      document.getElementById("result").innerText = words.join(" ");
+// Latin-style prefix generator
+function generateIllionName(n) {
+  if (n === 0) return "";
+  if (n === 1) return "thousand";
+  if (n === 2) return "million";
+
+  const latinUnits = [
+    "", "un", "duo", "tre", "quattuor",
+    "quin", "sex", "septen", "octo", "novem"
+  ];
+
+  const latinTens = [
+    "", "dec", "vigint", "trigint", "quadragint",
+    "quinquagint", "sexagint", "septuagint",
+    "octogint", "nonagint"
+  ];
+
+  const latinHundreds = [
+    "", "cent", "ducent", "trecent",
+    "quadringent", "quingent",
+    "sescent", "septingent",
+    "octingent", "nongent"
+  ];
+
+  let group = n - 2; // million starts at 2
+
+  let units = group % 10;
+  let tensPart = Math.floor(group / 10) % 10;
+  let hundredsPart = Math.floor(group / 100);
+
+  let name =
+    latinUnits[units] +
+    latinTens[tensPart] +
+    latinHundreds[hundredsPart];
+
+  return name + "illion";
+}
+
+function convert() {
+  let input = document.getElementById("numberInput").value.trim();
+
+  if (!/^\d+$/.test(input)) {
+    document.getElementById("result").innerText = "Enter a valid whole number.";
+    return;
+  }
+
+  if (input === "0") {
+    document.getElementById("result").innerText = "zero";
+    return;
+  }
+
+  let chunks = [];
+  while (input.length > 0) {
+    chunks.unshift(input.slice(-3));
+    input = input.slice(0, -3);
+  }
+
+  let words = "";
+
+  for (let i = 0; i < chunks.length; i++) {
+    let num = parseInt(chunks[i]);
+    if (num !== 0) {
+      let scaleIndex = chunks.length - 1 - i;
+      words += convertHundreds(num) + generateIllionName(scaleIndex) + " ";
     }
-  </script>
+  }
+
+  document.getElementById("result").innerText = words.trim();
+}
+
+</script>
 
 </body>
 </html>
