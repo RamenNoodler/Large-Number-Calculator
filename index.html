@@ -6,16 +6,23 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #302b63, #24243e);
+      background: linear-gradient(135deg, #141e30, #243b55, #0f2027);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
       color: white;
       text-align: center;
       padding: 40px;
     }
 
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     h1 {
       font-size: 36px;
-      margin-bottom: 30px;
-      text-shadow: 0 0 10px cyan;
+      text-shadow: 0 0 15px cyan;
     }
 
     input {
@@ -25,7 +32,7 @@
       font-size: 18px;
       border-radius: 10px;
       border: none;
-      outline: none;
+      margin-top: 20px;
       margin-bottom: 20px;
     }
 
@@ -59,13 +66,13 @@
 
     #result {
       margin-top: 30px;
-      font-size: 20px;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 20px;
+      font-size: 22px;
+      background: rgba(0,0,0,0.4);
+      padding: 25px;
       border-radius: 15px;
       display: inline-block;
       min-width: 300px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 25px rgba(0,255,255,0.4);
     }
 
     .sci {
@@ -79,7 +86,7 @@
 
 <h1>Infinite Number Name Calculator</h1>
 
-<input id="numberInput" placeholder="Enter a number (ex: 1000000000)" />
+<input id="numberInput" placeholder="Enter a number (example: 1000000000000)" />
 
 <div class="buttons">
   <button id="shortBtn" class="active" onclick="setScale('short')">Short Scale</button>
@@ -93,7 +100,7 @@
 
 let currentScale = "short";
 
-// Known names up to vigintillion
+// Hardcoded known names (historical/common)
 const knownNames = [
   "", "thousand", "million", "billion", "trillion",
   "quadrillion", "quintillion", "sextillion",
@@ -102,16 +109,20 @@ const knownNames = [
   "quattuordecillion", "quindecillion",
   "sexdecillion", "septendecillion",
   "octodecillion", "novemdecillion",
-  "vigintillion"
+  "vigintillion", "trigintillion",
+  "quadragintillion", "quinquagintillion",
+  "sexagintillion", "septuagintillion",
+  "octogintillion", "nonagintillion",
+  "centillion"
 ];
 
-// Latin roots
-const units = ["", "un", "duo", "tre", "quattuor", "quinqua", "se", "septe", "octo", "nove"];
-const tens = ["", "deci", "viginti", "triginta", "quadraginta", "quinquaginta",
-              "sexaginta", "septuaginta", "octoginta", "nonaginta"];
-const hundreds = ["", "centi", "ducenti", "trecenti", "quadringenti",
-                  "quingenti", "sescenti", "septingenti",
-                  "octingenti", "nongenti"];
+// Latin roots for infinite extension
+const units = ["", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"];
+const tens = ["", "dec", "vigint", "trigint", "quadragint", "quinquagint",
+              "sexagint", "septuagint", "octogint", "nonagint"];
+const hundreds = ["", "cent", "ducent", "trecent", "quadringent",
+                  "quingent", "sescent", "septingent",
+                  "octingent", "nongent"];
 
 function setScale(scale) {
   currentScale = scale;
@@ -119,11 +130,10 @@ function setScale(scale) {
   document.getElementById("shortBtn").classList.remove("active");
   document.getElementById("longBtn").classList.remove("active");
 
-  if (scale === "short") {
+  if (scale === "short")
     document.getElementById("shortBtn").classList.add("active");
-  } else {
+  else
     document.getElementById("longBtn").classList.add("active");
-  }
 }
 
 function latinIllion(n) {
@@ -136,6 +146,7 @@ function latinIllion(n) {
 
 function getShortScaleName(exp) {
   if (exp < 3) return "";
+
   let index = Math.floor(exp / 3) - 1;
 
   if (index < knownNames.length)
@@ -146,10 +157,8 @@ function getShortScaleName(exp) {
 
 function getLongScaleName(exp) {
   if (exp < 6) return "";
-  if (exp % 6 !== 0)
-    return "(no exact long-scale name for this power)";
 
-  let index = exp / 6;
+  let index = Math.floor(exp / 6);
 
   if (index < knownNames.length)
     return knownNames[index];
@@ -168,6 +177,7 @@ function convert() {
   }
 
   let clean = input.replace(/[^0-9]/g, "");
+
   if (clean.length === 0) {
     result.innerHTML = "Invalid number.";
     return;
@@ -178,13 +188,13 @@ function convert() {
 
   let name;
 
-  if (currentScale === "short") {
+  if (currentScale === "short")
     name = getShortScaleName(exponent);
-  } else {
+  else
     name = getLongScaleName(exponent);
-  }
 
-  if (!name) name = "(number too small for -illion name)";
+  if (!name)
+    name = "(number too small for -illion name)";
 
   result.innerHTML =
     "<strong>" + name + "</strong>" +
