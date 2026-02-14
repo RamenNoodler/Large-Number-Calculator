@@ -1,4 +1,93 @@
-alert("script loaded");
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infinity Number Engine</title>
+
+  <style>
+    body {
+      background-color: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 80px;
+      transition: background-color 0.4s, color 0.4s;
+    }
+
+    body.light {
+      background-color: #ffffff;
+      color: #111;
+    }
+
+    input {
+      padding: 12px;
+      width: 320px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 18px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin-left: 8px;
+      background-color: #3b82f6;
+      color: white;
+      transition: transform 0.15s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #result {
+      margin-top: 40px;
+      font-size: 20px;
+      word-break: break-word;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #themeWarning {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #111;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      display: none;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    #themeWarning button {
+      background: #ef4444;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Infinity Number Engine</h1>
+
+  <input id="input" type="text" placeholder="Enter a massive number">
+  <button onclick="analyzeNumber()">Analyze</button>
+  <button onclick="toggleTheme()">Toggle Theme</button>
+
+  <p id="result"></p>
+
+  <div id="themeWarning">
+    Switching to light mode...
+    <button onclick="cancelThemeSwitch()">Cancel</button>
+  </div>
+
+
+<script>
 
 function analyzeNumber() {
 
@@ -15,7 +104,7 @@ function analyzeNumber() {
   const name = generateInfinityName(length);
 
   document.getElementById("result").textContent =
-    `${cleaned} is ${name}`;
+    cleaned + " is " + name;
 }
 
 
@@ -29,80 +118,46 @@ function generateInfinityName(length) {
   if (length <= 15) return "1 trillion";
 
   const prefixes = [
-
-    // Greek-style
     "mono","duo","tri","tetra","penta","hexa","hepta","octa","nona","deca",
-    "hendeca","dodeca","trideca","tetradeca","pentadeca",
-    "icosa","triaconta","tetraconta","pentaconta","hexaconta",
-    "heptaconta","octaconta","enneaconta","hecto","kilo",
-
-    // Metric / scale
     "mega","giga","tera","peta","exa","zetta","yotta",
-    "bronto","gega","xenna","wega","vunda","udeka","trexa",
-
-    // Cosmic
     "astro","nova","stellar","quantum","cosma","galacti",
     "hyper","ultra","meta","omni","infra","supra","proto",
     "chrono","neutra","spectra","vortex","nebula","ionix","plasma",
-
-    // Sci-fi
-    "cyber","techno","mecha","nano","holo","synth",
+    "cyber","techno","nano","holo","synth",
     "matrix","vector","flux","pulse","omega","alpha","beta","gamma","delta",
-
-    // Fantasy
     "arcane","eldra","mythi","draco","phoeni","aether",
     "shadow","void","luna","sola","terra","aqua","igni","storma",
-
-    // Abstract
-    "prime","core","axiom","zeno","echo","novae","gravita",
+    "prime","core","axiom","zeno","echo","gravita",
     "magnus","ultima","eterni","infinia","trans","poly","multi",
     "macro","micro","crypta","mysti","dynami","radiant",
-
-    // Extra filler for density
-    "zenith","apex","nexus","orbita","helio","chrono","psycho",
+    "zenith","apex","nexus","orbita","helio","psycho",
     "electra","futura","tempra","spiral","fractal","binary","trinary",
     "celesti","harmoni","paradoxa","aurora","eclipse","singula"
   ];
 
-
-
   const cores = [
-
     "gola","zora","lamogeaniagola","tron","plex","maxima","gantium",
-    "zillion","tastrophe","nexium","voria","spectra","matrix",
+    "zillion","tastrophe","nexium","voria","spectra",
     "phoria","narium","lithon","dranium","vexium","torium","xoria",
-
-    "nadox","laxium","phorium","genesis","axis","primeon",
-    "quorium","dynamis","vortexium","stellon","aetheron",
-    "cyclorium","nebulon","galaxium","infiniton","cosmon",
-    "quanton","gravion","magnion","ultimon","transion",
-
-    "hyperion","ultrion","metalon","omnion","infinion",
-    "chronion","spectron","voidon","astrion","plasmion",
-    "fluxion","pulsarion","vectron","matrixion","omegon",
-
-    "alphion","betron","gammion","deltor","zenion","arcadion",
-    "mythron","dracon","phoenixon","aetherium","shadowon",
-    "lunarion","solarion","terranox","aquarion","ignisium",
-
-    "stormion","primon","corex","axiotron","echoion",
-    "novaion","gravitor","magnator","ultimator","eternion",
-
-    "transcendion","polytron","multion","macrox","microx",
-    "crypton","myston","dynamon","radiatron","zenithon",
-
-    "apexion","nexatron","orbitron","helion","psychron",
-    "electron","futuron","temporon","spiralion","fracton",
-
+    "genesis","axis","primeon","dynamis","vortexium","stellon",
+    "nebulon","galaxium","infiniton","cosmon","quanton","gravion",
+    "magnion","ultimon","transion","hyperion","ultrion",
+    "metalon","omnion","infinion","chronion","spectron",
+    "astrion","plasmion","fluxion","pulsarion","vectron",
+    "omegon","zenion","arcadion","mythron","dracon",
+    "phoenixon","aetherium","shadowon","lunarion","solarion",
+    "terranox","aquarion","ignisium","stormion","primon",
+    "corex","axiotron","echoion","novaion","gravitor",
+    "magnator","ultimator","eternion","polytron","multion",
+    "macrox","microx","crypton","myston","dynamon",
+    "radiatron","zenithon","apexion","nexatron","orbitron",
+    "helion","electron","futuron","spiralion","fracton",
     "binarion","trinarion","celestion","harmonix","paradoxon",
     "aurorion","eclipsion","singulon","absolon","incepton",
-
     "terminon","evolvon","creation","expansion","dominion",
     "dimension","cataclysm","eternamax","infinitamax",
-    "omniplux","megaplexion","ultraplexion","supernexon"
+    "omniplux","megaplexion","ultraplexion"
   ];
-
-
 
   let layers = Math.floor(length / 3);
   let name = "";
@@ -115,3 +170,36 @@ function generateInfinityName(length) {
 
   return "1 " + name;
 }
+
+
+
+let themeTimeout = null;
+
+function toggleTheme() {
+
+  const isLight = document.body.classList.contains("light");
+
+  if (!isLight) {
+
+    const warning = document.getElementById("themeWarning");
+    warning.style.display = "block";
+
+    themeTimeout = setTimeout(() => {
+      document.body.classList.add("light");
+      warning.style.display = "none";
+    }, 2000);
+
+  } else {
+    document.body.classList.remove("light");
+  }
+}
+
+function cancelThemeSwitch() {
+  clearTimeout(themeTimeout);
+  document.getElementById("themeWarning").style.display = "none";
+}
+
+</script>
+
+</body>
+</html>
