@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Infinite Number Name Calculator</title>
+  <title>Advanced Number Name Calculator</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+      background: #111827;
       color: white;
       text-align: center;
       padding: 40px;
     }
 
     h1 {
-      font-size: 2.5rem;
-      background: linear-gradient(to right, #00f5ff, #ff00f5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 2rem;
+      margin-bottom: 20px;
     }
 
     input {
       width: 80%;
       max-width: 600px;
-      padding: 15px;
+      padding: 12px;
       font-size: 18px;
-      border-radius: 10px;
+      border-radius: 8px;
       border: none;
-      margin-top: 20px;
+    }
+
+    .options {
+      margin-top: 15px;
     }
 
     button {
-      margin-top: 20px;
-      padding: 12px 25px;
-      font-size: 18px;
-      border-radius: 10px;
+      padding: 10px 18px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
       border: none;
       cursor: pointer;
-      background: linear-gradient(to right, #00f5ff, #ff00f5);
-      color: black;
-      font-weight: bold;
-      transition: 0.3s;
+      background: #3b82f6;
+      color: white;
     }
 
-    button:hover {
-      transform: scale(1.05);
+    button.active {
+      background: #10b981;
     }
 
     #result {
-      margin-top: 30px;
-      font-size: 22px;
+      margin-top: 25px;
+      font-size: 20px;
+      line-height: 1.6;
       word-wrap: break-word;
     }
   </style>
@@ -56,9 +56,14 @@
 
 <body>
 
-<h1>Infinite Number Name Calculator</h1>
+<h1>Advanced Number Name Calculator</h1>
 
 <input id="numberInput" placeholder="Enter a large number..." />
+
+<div class="options">
+  <button id="shortBtn" onclick="setScale('short')" class="active">Short Scale</button>
+  <button id="longBtn" onclick="setScale('long')">Long Scale</button>
+</div>
 
 <br>
 <button onclick="calculate()">Calculate</button>
@@ -68,19 +73,29 @@
 <script>
 
 // ==============================
-// UNIT PREFIXES (1–9)
+// SCALE MODE
 // ==============================
 
-const unitPrefixes = [
-  "", "un", "duo", "tri", "quad",
-  "quin", "sex", "sept", "oct", "non"
-];
+let currentScale = "short";
+
+function setScale(scale) {
+  currentScale = scale;
+
+  document.getElementById("shortBtn").classList.remove("active");
+  document.getElementById("longBtn").classList.remove("active");
+
+  if (scale === "short") {
+    document.getElementById("shortBtn").classList.add("active");
+  } else {
+    document.getElementById("longBtn").classList.add("active");
+  }
+}
 
 // ==============================
-// KNOWN THOUSAND PREFIXES
+// SHORT SCALE NAMES
 // ==============================
 
-const thousandPrefixes = [
+const shortScale = [
   "", "thousand", "million", "billion",
   "trillion", "quadrillion", "quintillion",
   "sextillion", "septillion", "octillion",
@@ -88,47 +103,69 @@ const thousandPrefixes = [
 ];
 
 // ==============================
-// YOUR CUSTOM EXTENSIONS
+// LONG SCALE NAMES
 // ==============================
 
-const customThousandPrefixes = [
+const longScale = [
+  "", "thousand", "million", "milliard",
+  "billion", "billiard", "trillion",
+  "trilliard", "quadrillion"
+];
+
+// ==============================
+// THEORETICAL EXTENSIONS
+// ==============================
+
+const unitPrefixes = [
+  "", "un", "duo", "tri", "quad",
+  "quin", "sex", "sept", "oct", "non"
+];
+
+const customPrefixes = [
   "zoa", "gon", "qaigen", "suno",
   "valen", "teron", "luxen", "phyr", "nexon"
 ];
 
-// ==============================
-// PREFIX GENERATOR
-// ==============================
+function getExtendedName(index, baseArray) {
 
-function getThousandPrefix(index) {
-
-  if (index < thousandPrefixes.length) {
-    return thousandPrefixes[index];
+  if (index < baseArray.length) {
+    return baseArray[index];
   }
 
-  const customIndex = index - thousandPrefixes.length;
-
-  if (customIndex < customThousandPrefixes.length) {
-    return customThousandPrefixes[customIndex] + "illion";
-  }
+  const customIndex = index - baseArray.length;
 
   const group = Math.floor(customIndex / 9);
   const unit = (customIndex % 9) + 1;
 
   const unitName = unitPrefixes[unit];
-  const groupName = customThousandPrefixes[group % customThousandPrefixes.length];
+  const groupName = customPrefixes[group % customPrefixes.length];
 
   return unitName + groupName + "illion";
 }
 
 // ==============================
-// MAIN CALCULATOR
+// SCIENTIFIC NOTATION
+// ==============================
+
+function toScientific(numStr) {
+
+  const length = numStr.length;
+
+  if (length === 1) return numStr;
+
+  const firstDigit = numStr[0];
+  const nextDigits = numStr.slice(1, 4);
+
+  return `${firstDigit}.${nextDigits} × 10^${length - 1}`;
+}
+
+// ==============================
+// MAIN CALCULATION
 // ==============================
 
 function calculate() {
 
   let numStr = document.getElementById("numberInput").value;
-
   numStr = numStr.replace(/,/g, "").trim();
 
   if (!/^\d+$/.test(numStr)) {
@@ -141,22 +178,30 @@ function calculate() {
     return;
   }
 
-  const groups = [];
+  const baseArray = currentScale === "short" ? shortScale : longScale;
 
-  while (numStr.length > 0) {
-    groups.unshift(numStr.slice(-3));
-    numStr = numStr.slice(0, -3);
+  const groups = [];
+  let temp = numStr;
+
+  while (temp.length > 0) {
+    groups.unshift(temp.slice(-3));
+    temp = temp.slice(0, -3);
   }
 
   const highestIndex = groups.length - 1;
   const highestValue = parseInt(groups[0]);
 
-  const prefix = getThousandPrefix(highestIndex);
+  const name = getExtendedName(highestIndex, baseArray);
 
   const decimalPart = groups[1] ? "." + groups[1].padStart(3, "0").slice(0,3) : "";
 
-  document.getElementById("result").innerText =
-    `${highestValue}${decimalPart} ${prefix}`;
+  const scientific = toScientific(numStr);
+
+  document.getElementById("result").innerHTML =
+    `<strong>Named Form:</strong><br>
+     ${highestValue}${decimalPart} ${name}<br><br>
+     <strong>Scientific Notation:</strong><br>
+     ${scientific}`;
 }
 
 </script>
