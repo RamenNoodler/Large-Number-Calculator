@@ -1,203 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Infinite Number Name Engine</title>
+  <title>Infinite Number Name Calculator</title>
 
-<style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
 
-body{
-  font-family: Arial;
-  background: linear-gradient(135deg,#1e3c72,#2a5298);
-  color:white;
-  text-align:center;
-  padding:40px;
-}
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(to right, #00f5ff, #ff00f5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-textarea{
-  width:80%;
-  height:120px;
-  font-size:16px;
-  border-radius:10px;
-  padding:10px;
-}
+    input {
+      width: 80%;
+      max-width: 600px;
+      padding: 15px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      margin-top: 20px;
+    }
 
-button{
-  padding:12px 20px;
-  margin:10px;
-  font-size:16px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-}
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(to right, #00f5ff, #ff00f5);
+      color: black;
+      font-weight: bold;
+      transition: 0.3s;
+    }
 
-.mode{
-  background:#444;
-  color:white;
-}
+    button:hover {
+      transform: scale(1.05);
+    }
 
-.active{
-  background:#00c853;
-}
-
-.result{
-  margin-top:20px;
-  padding:20px;
-  background:rgba(0,0,0,.4);
-  border-radius:10px;
-  word-wrap:break-word;
-}
-
-.small{
-  color:#bbb;
-  font-size:14px;
-}
-
-</style>
+    #result {
+      margin-top: 30px;
+      font-size: 22px;
+      word-wrap: break-word;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>Infinite Number Name Engine</h1>
+<h1>Infinite Number Name Calculator</h1>
 
-<textarea id="input" placeholder="Paste giant number here"></textarea><br>
-
-<button onclick="calculate()">Calculate</button>
+<input id="numberInput" placeholder="Enter a large number..." />
 
 <br>
+<button onclick="calculate()">Calculate</button>
 
-<button id="simpleBtn" class="mode active" onclick="setMode('simple')">
-Simple Infinite Mode
-</button>
-
-<button id="trueBtn" class="mode" onclick="setMode('true')">
-True Conway–Guy Mode
-</button>
-
-<div id="result" class="result"></div>
+<div id="result"></div>
 
 <script>
 
-let mode="simple";
+// ==============================
+// UNIT PREFIXES (1–9)
+// ==============================
 
-function setMode(m){
-
-  mode=m;
-
-  document.getElementById("simpleBtn").classList.remove("active");
-  document.getElementById("trueBtn").classList.remove("active");
-
-  if(m==="simple")
-    document.getElementById("simpleBtn").classList.add("active");
-  else
-    document.getElementById("trueBtn").classList.add("active");
-
-}
-
-const known = [
-"",
-"thousand",
-"million",
-"billion",
-"trillion",
-"quadrillion",
-"quintillion",
-"sextillion",
-"septillion",
-"octillion",
-"nonillion",
-"decillion",
-"undecillion",
-"duodecillion",
-"tredecillion",
-"quattuordecillion",
-"quindecillion",
-"sexdecillion",
-"septendecillion",
-"octodecillion",
-"novemdecillion",
-"vigintillion"
+const unitPrefixes = [
+  "", "un", "duo", "tri", "quad",
+  "quin", "sex", "sept", "oct", "non"
 ];
 
-const units=["","un","duo","tre","quattuor","quin","sex","septen","octo","novem"];
-const tens=["","dec","vigint","trigint","quadragint","quinquagint","sexagint","septuagint","octogint","nonagint"];
-const hundreds=["","cent","ducent","trecent","quadringent","quingent","sescent","septingent","octingent","nongent"];
+// ==============================
+// KNOWN THOUSAND PREFIXES
+// ==============================
 
-const thousands=["","mill","micr","nan","pic","femt","att","zept","yoct"];
+const thousandPrefixes = [
+  "", "thousand", "million", "billion",
+  "trillion", "quadrillion", "quintillion",
+  "sextillion", "septillion", "octillion",
+  "nonillion", "decillion"
+];
 
-function simpleLatin(n){
+// ==============================
+// YOUR CUSTOM EXTENSIONS
+// ==============================
 
-  let u=n%10;
-  let t=Math.floor(n/10)%10;
-  let h=Math.floor(n/100)%10;
+const customThousandPrefixes = [
+  "zoa", "gon", "qaigen", "suno",
+  "valen", "teron", "luxen", "phyr", "nexon"
+];
 
-  return units[u]+tens[t]+hundreds[h]+"illion";
+// ==============================
+// PREFIX GENERATOR
+// ==============================
 
-}
+function getThousandPrefix(index) {
 
-function trueLatin(n){
-
-  if(n<known.length)
-    return known[n];
-
-  let parts=[];
-
-  let group=0;
-
-  while(n>0){
-
-    let chunk=n%1000;
-
-    if(chunk>0){
-
-      let name=units[chunk%10]+
-               tens[Math.floor(chunk/10)%10]+
-               hundreds[Math.floor(chunk/100)%10];
-
-      let power=thousands[group]||("x"+group);
-
-      parts.unshift(name+power);
-
-    }
-
-    n=Math.floor(n/1000);
-    group++;
-
+  if (index < thousandPrefixes.length) {
+    return thousandPrefixes[index];
   }
 
-  return parts.join("")+"illion";
+  const customIndex = index - thousandPrefixes.length;
 
+  if (customIndex < customThousandPrefixes.length) {
+    return customThousandPrefixes[customIndex] + "illion";
+  }
+
+  const group = Math.floor(customIndex / 9);
+  const unit = (customIndex % 9) + 1;
+
+  const unitName = unitPrefixes[unit];
+  const groupName = customThousandPrefixes[group % customThousandPrefixes.length];
+
+  return unitName + groupName + "illion";
 }
 
-function smallName(exp){
+// ==============================
+// MAIN CALCULATOR
+// ==============================
 
-  let index=Math.floor(Math.abs(exp)/3);
+function calculate() {
 
-  if(mode==="simple")
-    return simpleLatin(index);
+  let numStr = document.getElementById("numberInput").value;
 
-  return trueLatin(index);
+  numStr = numStr.replace(/,/g, "").trim();
 
-}
+  if (!/^\d+$/.test(numStr)) {
+    document.getElementById("result").innerText = "Invalid number.";
+    return;
+  }
 
-function calculate(){
+  if (numStr === "0") {
+    document.getElementById("result").innerText = "0";
+    return;
+  }
 
-  let num=document.getElementById("input").value.replace(/\D/g,'');
+  const groups = [];
 
-  if(num.length===0)return;
+  while (numStr.length > 0) {
+    groups.unshift(numStr.slice(-3));
+    numStr = numStr.slice(0, -3);
+  }
 
-  let exp=num.length-1;
+  const highestIndex = groups.length - 1;
+  const highestValue = parseInt(groups[0]);
 
-  let sci=num[0]+"."+num.slice(1,6)+" × 10^"+exp;
+  const prefix = getThousandPrefix(highestIndex);
 
-  let name=smallName(exp);
+  const decimalPart = groups[1] ? "." + groups[1].padStart(3, "0").slice(0,3) : "";
 
-  document.getElementById("result").innerHTML=
-  "<b>Scientific notation:</b><br>"+sci+
-  "<br><br>"+
-  "<b>Name:</b><br>"+name+
-  "<br><br>"+
-  "<div class='small'>10^"+exp+"</div>";
-
+  document.getElementById("result").innerText =
+    `${highestValue}${decimalPart} ${prefix}`;
 }
 
 </script>
