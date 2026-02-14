@@ -1,167 +1,174 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Advanced Number Name Calculator</title>
+  <title>Number Engine App</title>
 
   <style>
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #111827;
       color: white;
-      text-align: center;
-      padding: 40px;
+      display: flex;
     }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 20px;
+    /* Sidebar */
+
+    #sidebar {
+      width: 250px;
+      background: #1f2937;
+      padding: 20px;
+      transition: 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #sidebar.hidden {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    #sidebar h2 {
+      margin-top: 0;
+    }
+
+    .menu-button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-bottom: 5px;
+    }
+
+    .menu-button.active {
+      background: #3b82f6;
+    }
+
+    /* Main Content */
+
+    #main {
+      flex: 1;
+      padding: 30px;
+      position: relative;
+    }
+
+    #toggleSidebar {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 18px;
+      background: #374151;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
     }
 
     input {
       width: 80%;
-      max-width: 600px;
-      padding: 12px;
+      max-width: 500px;
+      padding: 10px;
       font-size: 18px;
-      border-radius: 8px;
-      border: none;
-    }
-
-    .options {
-      margin-top: 15px;
-    }
-
-    button {
-      padding: 10px 18px;
-      margin: 5px;
-      font-size: 16px;
       border-radius: 6px;
       border: none;
-      cursor: pointer;
-      background: #3b82f6;
-      color: white;
+      margin-top: 20px;
     }
 
-    button.active {
+    button.action {
+      margin-top: 15px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: none;
       background: #10b981;
+      color: white;
+      cursor: pointer;
     }
 
     #result {
-      margin-top: 25px;
-      font-size: 20px;
-      line-height: 1.6;
-      word-wrap: break-word;
+      margin-top: 20px;
+      font-size: 18px;
+      line-height: 1.5;
     }
+
+    #historyList {
+      margin-top: 20px;
+      font-size: 14px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
   </style>
 </head>
 
 <body>
 
-<h1>Advanced Number Name Calculator</h1>
-
-<input id="numberInput" placeholder="Enter a large number..." />
-
-<div class="options">
-  <button id="shortBtn" onclick="setScale('short')" class="active">Short Scale</button>
-  <button id="longBtn" onclick="setScale('long')">Long Scale</button>
+<div id="sidebar">
+  <h2>Tools</h2>
+  <button class="menu-button active" onclick="showTool('calculator')">Calculator</button>
+  <button class="menu-button" onclick="showTool('history')">History</button>
 </div>
 
-<br>
-<button onclick="calculate()">Calculate</button>
+<div id="main">
 
-<div id="result"></div>
+  <button id="toggleSidebar" onclick="toggleSidebar()">☰</button>
+
+  <div id="calculatorTool">
+    <h1>Number Name Calculator</h1>
+    <input id="numberInput" placeholder="Enter number..." />
+    <br>
+    <button class="action" onclick="calculate()">Calculate</button>
+    <div id="result"></div>
+  </div>
+
+  <div id="historyTool" style="display:none;">
+    <h1>Calculation History</h1>
+    <div id="historyList"></div>
+  </div>
+
+</div>
 
 <script>
 
-// ==============================
-// SCALE MODE
-// ==============================
+// Sidebar Toggle
 
-let currentScale = "short";
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("hidden");
+}
 
-function setScale(scale) {
-  currentScale = scale;
+// Tool Switching
 
-  document.getElementById("shortBtn").classList.remove("active");
-  document.getElementById("longBtn").classList.remove("active");
+function showTool(tool) {
 
-  if (scale === "short") {
-    document.getElementById("shortBtn").classList.add("active");
-  } else {
-    document.getElementById("longBtn").classList.add("active");
+  document.getElementById("calculatorTool").style.display = "none";
+  document.getElementById("historyTool").style.display = "none";
+
+  document.querySelectorAll(".menu-button").forEach(btn =>
+    btn.classList.remove("active")
+  );
+
+  if (tool === "calculator") {
+    document.getElementById("calculatorTool").style.display = "block";
+    document.querySelectorAll(".menu-button")[0].classList.add("active");
+  }
+
+  if (tool === "history") {
+    document.getElementById("historyTool").style.display = "block";
+    document.querySelectorAll(".menu-button")[1].classList.add("active");
+    loadHistory();
   }
 }
 
-// ==============================
-// SHORT SCALE NAMES
-// ==============================
+// Number Naming (Basic Short Scale)
 
 const shortScale = [
   "", "thousand", "million", "billion",
-  "trillion", "quadrillion", "quintillion",
-  "sextillion", "septillion", "octillion",
-  "nonillion", "decillion"
+  "trillion", "quadrillion", "quintillion"
 ];
-
-// ==============================
-// LONG SCALE NAMES
-// ==============================
-
-const longScale = [
-  "", "thousand", "million", "milliard",
-  "billion", "billiard", "trillion",
-  "trilliard", "quadrillion"
-];
-
-// ==============================
-// THEORETICAL EXTENSIONS
-// ==============================
-
-const unitPrefixes = [
-  "", "un", "duo", "tri", "quad",
-  "quin", "sex", "sept", "oct", "non"
-];
-
-const customPrefixes = [
-  "zoa", "gon", "qaigen", "suno",
-  "valen", "teron", "luxen", "phyr", "nexon"
-];
-
-function getExtendedName(index, baseArray) {
-
-  if (index < baseArray.length) {
-    return baseArray[index];
-  }
-
-  const customIndex = index - baseArray.length;
-
-  const group = Math.floor(customIndex / 9);
-  const unit = (customIndex % 9) + 1;
-
-  const unitName = unitPrefixes[unit];
-  const groupName = customPrefixes[group % customPrefixes.length];
-
-  return unitName + groupName + "illion";
-}
-
-// ==============================
-// SCIENTIFIC NOTATION
-// ==============================
-
-function toScientific(numStr) {
-
-  const length = numStr.length;
-
-  if (length === 1) return numStr;
-
-  const firstDigit = numStr[0];
-  const nextDigits = numStr.slice(1, 4);
-
-  return `${firstDigit}.${nextDigits} × 10^${length - 1}`;
-}
-
-// ==============================
-// MAIN CALCULATION
-// ==============================
 
 function calculate() {
 
@@ -172,13 +179,6 @@ function calculate() {
     document.getElementById("result").innerText = "Invalid number.";
     return;
   }
-
-  if (numStr === "0") {
-    document.getElementById("result").innerText = "0";
-    return;
-  }
-
-  const baseArray = currentScale === "short" ? shortScale : longScale;
 
   const groups = [];
   let temp = numStr;
@@ -191,17 +191,38 @@ function calculate() {
   const highestIndex = groups.length - 1;
   const highestValue = parseInt(groups[0]);
 
-  const name = getExtendedName(highestIndex, baseArray);
+  const name = shortScale[highestIndex] || "huge-number";
 
-  const decimalPart = groups[1] ? "." + groups[1].padStart(3, "0").slice(0,3) : "";
+  const output = `${highestValue} ${name}`;
 
-  const scientific = toScientific(numStr);
+  document.getElementById("result").innerText = output;
 
-  document.getElementById("result").innerHTML =
-    `<strong>Named Form:</strong><br>
-     ${highestValue}${decimalPart} ${name}<br><br>
-     <strong>Scientific Notation:</strong><br>
-     ${scientific}`;
+  saveToHistory(numStr, output);
+}
+
+// Memory Storage (Local Storage)
+
+function saveToHistory(input, result) {
+
+  let history = JSON.parse(localStorage.getItem("calcHistory")) || [];
+
+  history.unshift({ input, result });
+
+  localStorage.setItem("calcHistory", JSON.stringify(history));
+}
+
+function loadHistory() {
+
+  let history = JSON.parse(localStorage.getItem("calcHistory")) || [];
+
+  const historyDiv = document.getElementById("historyList");
+  historyDiv.innerHTML = "";
+
+  history.forEach(item => {
+    const entry = document.createElement("div");
+    entry.innerText = `${item.input} → ${item.result}`;
+    historyDiv.appendChild(entry);
+  });
 }
 
 </script>
