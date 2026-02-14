@@ -4,26 +4,74 @@
   <title>Infinite Number Name Calculator</title>
   <style>
     body {
-      font-family: Arial;
-      padding: 40px;
-      background: #111;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #302b63, #24243e);
       color: white;
+      text-align: center;
+      padding: 40px;
     }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px cyan;
+    }
+
     input {
-      width: 100%;
-      padding: 10px;
+      width: 80%;
+      max-width: 600px;
+      padding: 12px;
       font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
       margin-bottom: 20px;
     }
+
+    .buttons {
+      margin-bottom: 20px;
+    }
+
     button {
       padding: 10px 20px;
-      font-size: 18px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
       cursor: pointer;
+      background: #00c6ff;
+      color: black;
+      font-weight: bold;
+      transition: 0.3s;
     }
+
+    button:hover {
+      background: #00ffff;
+      box-shadow: 0 0 15px cyan;
+    }
+
+    .active {
+      background: #ff00cc;
+      color: white;
+      box-shadow: 0 0 15px magenta;
+    }
+
     #result {
       margin-top: 30px;
-      white-space: pre-line;
-      font-size: 18px;
+      font-size: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px;
+      border-radius: 15px;
+      display: inline-block;
+      min-width: 300px;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .sci {
+      font-size: 16px;
+      color: #aaa;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -31,14 +79,21 @@
 
 <h1>Infinite Number Name Calculator</h1>
 
-<input id="numberInput" placeholder="Enter a number (can be very large)" />
-<button onclick="convert()">Convert</button>
+<input id="numberInput" placeholder="Enter a number (ex: 1000000000)" />
+
+<div class="buttons">
+  <button id="shortBtn" class="active" onclick="setScale('short')">Short Scale</button>
+  <button id="longBtn" onclick="setScale('long')">Long Scale</button>
+  <button onclick="convert()">Convert</button>
+</div>
 
 <div id="result"></div>
 
 <script>
 
-// Hardcoded known names (short scale index-based)
+let currentScale = "short";
+
+// Known names up to vigintillion
 const knownNames = [
   "", "thousand", "million", "billion", "trillion",
   "quadrillion", "quintillion", "sextillion",
@@ -50,13 +105,26 @@ const knownNames = [
   "vigintillion"
 ];
 
-// Latin roots for infinite extension
+// Latin roots
 const units = ["", "un", "duo", "tre", "quattuor", "quinqua", "se", "septe", "octo", "nove"];
 const tens = ["", "deci", "viginti", "triginta", "quadraginta", "quinquaginta",
               "sexaginta", "septuaginta", "octoginta", "nonaginta"];
 const hundreds = ["", "centi", "ducenti", "trecenti", "quadringenti",
                   "quingenti", "sescenti", "septingenti",
                   "octingenti", "nongenti"];
+
+function setScale(scale) {
+  currentScale = scale;
+
+  document.getElementById("shortBtn").classList.remove("active");
+  document.getElementById("longBtn").classList.remove("active");
+
+  if (scale === "short") {
+    document.getElementById("shortBtn").classList.add("active");
+  } else {
+    document.getElementById("longBtn").classList.add("active");
+  }
+}
 
 function latinIllion(n) {
   let u = n % 10;
@@ -78,7 +146,8 @@ function getShortScaleName(exp) {
 
 function getLongScaleName(exp) {
   if (exp < 6) return "";
-  if (exp % 6 !== 0) return "(not exact long-scale name)";
+  if (exp % 6 !== 0)
+    return "(no exact long-scale name for this power)";
 
   let index = exp / 6;
 
@@ -94,25 +163,32 @@ function convert() {
   let result = document.getElementById("result");
 
   if (!input) {
-    result.innerText = "Enter a number.";
+    result.innerHTML = "Enter a number.";
     return;
   }
 
-  let big = BigInt(input.replace(".", ""));
-  let exponent = input.includes(".")
-    ? input.split(".")[1].length * -1
-    : big.toString().length - 1;
+  let clean = input.replace(/[^0-9]/g, "");
+  if (clean.length === 0) {
+    result.innerHTML = "Invalid number.";
+    return;
+  }
 
-  let scientific = "≈ 10^" + exponent;
+  let exponent = clean.length - 1;
+  let sci = "≈ 10^" + exponent;
 
-  let shortName = getShortScaleName(exponent);
-  let longName = getLongScaleName(exponent);
+  let name;
 
-  result.innerText =
-    "Short Scale: " + shortName + "\n" +
-    scientific + "\n\n" +
-    "Long Scale: " + longName + "\n" +
-    scientific;
+  if (currentScale === "short") {
+    name = getShortScaleName(exponent);
+  } else {
+    name = getLongScaleName(exponent);
+  }
+
+  if (!name) name = "(number too small for -illion name)";
+
+  result.innerHTML =
+    "<strong>" + name + "</strong>" +
+    "<div class='sci'>" + sci + "</div>";
 }
 
 </script>
