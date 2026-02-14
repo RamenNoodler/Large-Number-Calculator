@@ -1,229 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Infinite Number Name Generator</title>
+  <title>Infinite Number Name Calculator</title>
   <style>
     body {
       font-family: Arial;
-      background: #0e0e0e;
-      color: white;
-      text-align: center;
       padding: 40px;
+      background: #111;
+      color: white;
     }
-
-    .input-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 15px;
-    }
-
     input {
-      width: 600px;
-      padding: 12px;
+      width: 100%;
+      padding: 10px;
       font-size: 18px;
-      border-radius: 8px;
-      border: none;
+      margin-bottom: 20px;
     }
-
-    .counter {
-      font-size: 16px;
-      opacity: 0.8;
-    }
-
     button {
-      padding: 12px 25px;
+      padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      margin-top: 10px;
     }
-
     #result {
-      margin-top: 40px;
-      font-size: 20px;
-      max-width: 1100px;
-      margin-left: auto;
-      margin-right: auto;
-      word-wrap: break-word;
-    }
-
-    .math {
-      margin-top: 15px;
-      font-size: 16px;
-      opacity: 0.7;
+      margin-top: 30px;
+      white-space: pre-line;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
 
-<h1>Infinite Number Name Generator</h1>
+<h1>Infinite Number Name Calculator</h1>
 
-<div class="input-row">
-  <input type="text" id="numberInput" placeholder="Enter an extremely large number">
-  <div class="counter">
-    Zeros: <span id="zeroCount">0</span><br>
-    Digits: <span id="digitCount">0</span>
-  </div>
-</div>
-
+<input id="numberInput" placeholder="Enter a number (can be very large)" />
 <button onclick="convert()">Convert</button>
 
 <div id="result"></div>
-<div class="math" id="mathInfo"></div>
 
 <script>
 
-// --- BASIC WORDS ---
-const ones = ["","one","two","three","four","five","six","seven","eight","nine"];
-const teens = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
-const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-
-// Proper names up to centillion (short scale)
-const realScales = [
+// Hardcoded known names (short scale index-based)
+const knownNames = [
   "", "thousand", "million", "billion", "trillion",
   "quadrillion", "quintillion", "sextillion",
-  "septillion", "octillion", "nonillion",
-  "decillion", "undecillion", "duodecillion",
-  "tredecillion", "quattuordecillion",
-  "quindecillion", "sexdecillion",
-  "septendecillion", "octodecillion",
-  "novemdecillion", "vigintillion",
-  "trigintillion", "quadragintillion",
-  "quinquagintillion", "sexagintillion",
-  "septuagintillion", "octogintillion",
-  "nonagintillion", "centillion"
+  "septillion", "octillion", "nonillion", "decillion",
+  "undecillion", "duodecillion", "tredecillion",
+  "quattuordecillion", "quindecillion",
+  "sexdecillion", "septendecillion",
+  "octodecillion", "novemdecillion",
+  "vigintillion"
 ];
 
-// --- LIVE COUNTERS ---
-document.getElementById("numberInput").addEventListener("input", function() {
-  let value = this.value.replace(/^0+/, "");
-  let digits = value.length;
-  let zeros = digits > 0 ? digits - 1 : 0;
+// Latin roots for infinite extension
+const units = ["", "un", "duo", "tre", "quattuor", "quinqua", "se", "septe", "octo", "nove"];
+const tens = ["", "deci", "viginti", "triginta", "quadraginta", "quinquaginta",
+              "sexaginta", "septuaginta", "octoginta", "nonaginta"];
+const hundreds = ["", "centi", "ducenti", "trecenti", "quadringenti",
+                  "quingenti", "sescenti", "septingenti",
+                  "octingenti", "nongenti"];
 
-  document.getElementById("digitCount").innerText = digits;
-  document.getElementById("zeroCount").innerText = zeros;
-});
+function latinIllion(n) {
+  let u = n % 10;
+  let t = Math.floor(n / 10) % 10;
+  let h = Math.floor(n / 100) % 10;
 
-// --- CONVERT HUNDREDS ---
-function convertHundreds(num) {
-  let result = "";
-
-  if (num >= 100) {
-    result += ones[Math.floor(num/100)] + " hundred ";
-    num %= 100;
-  }
-
-  if (num >= 20) {
-    result += tens[Math.floor(num/10)] + " ";
-    num %= 10;
-  } else if (num >= 10) {
-    result += teens[num-10] + " ";
-    return result;
-  }
-
-  if (num > 0) result += ones[num] + " ";
-
-  return result;
+  return units[u] + tens[t] + hundreds[h] + "illion";
 }
 
-// --- INFINITE SCALE GENERATOR ---
-function getScaleName(index) {
+function getShortScaleName(exp) {
+  if (exp < 3) return "";
+  let index = Math.floor(exp / 3) - 1;
 
-  // thousand & million are special
-  if (index === 0) return "";
-  if (index === 1) return "thousand";
-  if (index === 2) return "million";
+  if (index < knownNames.length)
+    return knownNames[index];
 
-  // Conway–Guy index system
-  let n = index - 1;
-
-  const units = [
-    "", "un", "duo", "tre", "quattuor",
-    "quin", "sex", "septen", "octo", "novem"
-  ];
-
-  const tens = [
-    "", "dec", "vigint", "trigint",
-    "quadragint", "quinquagint",
-    "sexagint", "septuagint",
-    "octogint", "nonagint"
-  ];
-
-  const hundreds = [
-    "", "cent", "ducent", "trecent",
-    "quadringent", "quingent",
-    "sescent", "septingent",
-    "octingent", "nongent"
-  ];
-
-  let name = "";
-  let remaining = n;
-
-  while (remaining > 0) {
-
-    let u = remaining % 10;
-    let t = Math.floor(remaining / 10) % 10;
-    let h = Math.floor(remaining / 100) % 10;
-
-    name =
-      units[u] +
-      tens[t] +
-      hundreds[h] +
-      name;
-
-    remaining = Math.floor(remaining / 1000);
-  }
-
-  return name + "illion";
+  return latinIllion(index);
 }
 
+function getLongScaleName(exp) {
+  if (exp < 6) return "";
+  if (exp % 6 !== 0) return "(not exact long-scale name)";
 
-// --- MAIN CONVERT ---
+  let index = exp / 6;
+
+  if (index < knownNames.length)
+    return knownNames[index];
+
+  return latinIllion(index);
+}
+
 function convert() {
 
   let input = document.getElementById("numberInput").value.trim();
+  let result = document.getElementById("result");
 
-  if (!/^\d+$/.test(input)) {
-    document.getElementById("result").innerText = "Enter a valid whole number.";
+  if (!input) {
+    result.innerText = "Enter a number.";
     return;
   }
 
-  if (input === "0") {
-    document.getElementById("result").innerText = "zero";
-    document.getElementById("mathInfo").innerText = "";
-    return;
-  }
+  let big = BigInt(input.replace(".", ""));
+  let exponent = input.includes(".")
+    ? input.split(".")[1].length * -1
+    : big.toString().length - 1;
 
-  let originalLength = input.length;
+  let scientific = "≈ 10^" + exponent;
 
-  let chunks = [];
-  while (input.length > 0) {
-    chunks.unshift(input.slice(-3));
-    input = input.slice(0, -3);
-  }
+  let shortName = getShortScaleName(exponent);
+  let longName = getLongScaleName(exponent);
 
-  let words = "";
-
-  for (let i = 0; i < chunks.length; i++) {
-    let num = parseInt(chunks[i]);
-    if (num !== 0) {
-      let scaleIndex = chunks.length - 1 - i;
-      words += convertHundreds(num) + getScaleName(scaleIndex) + " ";
-    }
-  }
-
-  document.getElementById("result").innerText = words.trim();
-
-  // Mathematical info
-  let exponent = originalLength - 1;
-  document.getElementById("mathInfo").innerText =
-    "Scientific form: 10^" + exponent +
-    "  (1 followed by " + exponent + " zeros)";
+  result.innerText =
+    "Short Scale: " + shortName + "\n" +
+    scientific + "\n\n" +
+    "Long Scale: " + longName + "\n" +
+    scientific;
 }
 
 </script>
