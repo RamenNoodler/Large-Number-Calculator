@@ -1,204 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Infinite Number Name Calculator</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55, #0f2027);
-      background-size: 400% 400%;
-      animation: gradientMove 12s ease infinite;
-      color: white;
-      text-align: center;
-      padding: 40px;
-    }
+<meta charset="UTF-8">
+<title>Infinite Number Name Engine</title>
 
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+<style>
 
-    h1 {
-      font-size: 36px;
-      text-shadow: 0 0 15px cyan;
-    }
+body{
+  font-family: Arial;
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  color:white;
+  text-align:center;
+  padding:40px;
+}
 
-    input {
-      width: 80%;
-      max-width: 600px;
-      padding: 12px;
-      font-size: 18px;
-      border-radius: 10px;
-      border: none;
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
+textarea{
+  width:80%;
+  height:120px;
+  font-size:16px;
+  border-radius:10px;
+  padding:10px;
+}
 
-    .buttons {
-      margin-bottom: 20px;
-    }
+button{
+  padding:12px 20px;
+  margin:10px;
+  font-size:16px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+}
 
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 5px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background: #00c6ff;
-      color: black;
-      font-weight: bold;
-      transition: 0.3s;
-    }
+.mode{
+  background:#444;
+  color:white;
+}
 
-    button:hover {
-      background: #00ffff;
-      box-shadow: 0 0 15px cyan;
-    }
+.active{
+  background:#00c853;
+}
 
-    .active {
-      background: #ff00cc;
-      color: white;
-      box-shadow: 0 0 15px magenta;
-    }
+.result{
+  margin-top:20px;
+  padding:20px;
+  background:rgba(0,0,0,.4);
+  border-radius:10px;
+  word-wrap:break-word;
+}
 
-    #result {
-      margin-top: 30px;
-      font-size: 22px;
-      background: rgba(0,0,0,0.4);
-      padding: 25px;
-      border-radius: 15px;
-      display: inline-block;
-      min-width: 300px;
-      box-shadow: 0 0 25px rgba(0,255,255,0.4);
-    }
+.small{
+  color:#bbb;
+  font-size:14px;
+}
 
-    .sci {
-      font-size: 16px;
-      color: #aaa;
-      margin-top: 10px;
-    }
-  </style>
+</style>
 </head>
 <body>
 
-<h1>Infinite Number Name Calculator</h1>
+<h1>Infinite Number Name Engine</h1>
 
-<input id="numberInput" placeholder="Enter a number (example: 1000000000000)" />
+<textarea id="input" placeholder="Paste giant number here"></textarea><br>
 
-<div class="buttons">
-  <button id="shortBtn" class="active" onclick="setScale('short')">Short Scale</button>
-  <button id="longBtn" onclick="setScale('long')">Long Scale</button>
-  <button onclick="convert()">Convert</button>
-</div>
+<button onclick="calculate()">Calculate</button>
 
-<div id="result"></div>
+<br>
+
+<button id="simpleBtn" class="mode active" onclick="setMode('simple')">
+Simple Infinite Mode
+</button>
+
+<button id="trueBtn" class="mode" onclick="setMode('true')">
+True Conway–Guy Mode
+</button>
+
+<div id="result" class="result"></div>
 
 <script>
 
-let currentScale = "short";
+let mode="simple";
 
-// Hardcoded known names (historical/common)
-const knownNames = [
-  "", "thousand", "million", "billion", "trillion",
-  "quadrillion", "quintillion", "sextillion",
-  "septillion", "octillion", "nonillion", "decillion",
-  "undecillion", "duodecillion", "tredecillion",
-  "quattuordecillion", "quindecillion",
-  "sexdecillion", "septendecillion",
-  "octodecillion", "novemdecillion",
-  "vigintillion", "trigintillion",
-  "quadragintillion", "quinquagintillion",
-  "sexagintillion", "septuagintillion",
-  "octogintillion", "nonagintillion",
-  "centillion"
+function setMode(m){
+
+  mode=m;
+
+  document.getElementById("simpleBtn").classList.remove("active");
+  document.getElementById("trueBtn").classList.remove("active");
+
+  if(m==="simple")
+    document.getElementById("simpleBtn").classList.add("active");
+  else
+    document.getElementById("trueBtn").classList.add("active");
+
+}
+
+const known = [
+"",
+"thousand",
+"million",
+"billion",
+"trillion",
+"quadrillion",
+"quintillion",
+"sextillion",
+"septillion",
+"octillion",
+"nonillion",
+"decillion",
+"undecillion",
+"duodecillion",
+"tredecillion",
+"quattuordecillion",
+"quindecillion",
+"sexdecillion",
+"septendecillion",
+"octodecillion",
+"novemdecillion",
+"vigintillion"
 ];
 
-// Latin roots for infinite extension
-const units = ["", "un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"];
-const tens = ["", "dec", "vigint", "trigint", "quadragint", "quinquagint",
-              "sexagint", "septuagint", "octogint", "nonagint"];
-const hundreds = ["", "cent", "ducent", "trecent", "quadringent",
-                  "quingent", "sescent", "septingent",
-                  "octingent", "nongent"];
+const units=["","un","duo","tre","quattuor","quin","sex","septen","octo","novem"];
+const tens=["","dec","vigint","trigint","quadragint","quinquagint","sexagint","septuagint","octogint","nonagint"];
+const hundreds=["","cent","ducent","trecent","quadringent","quingent","sescent","septingent","octingent","nongent"];
 
-function setScale(scale) {
-  currentScale = scale;
+const thousands=["","mill","micr","nan","pic","femt","att","zept","yoct"];
 
-  document.getElementById("shortBtn").classList.remove("active");
-  document.getElementById("longBtn").classList.remove("active");
+function simpleLatin(n){
 
-  if (scale === "short")
-    document.getElementById("shortBtn").classList.add("active");
-  else
-    document.getElementById("longBtn").classList.add("active");
+  let u=n%10;
+  let t=Math.floor(n/10)%10;
+  let h=Math.floor(n/100)%10;
+
+  return units[u]+tens[t]+hundreds[h]+"illion";
+
 }
 
-function latinIllion(n) {
-  let u = n % 10;
-  let t = Math.floor(n / 10) % 10;
-  let h = Math.floor(n / 100) % 10;
+function trueLatin(n){
 
-  return units[u] + tens[t] + hundreds[h] + "illion";
-}
+  if(n<known.length)
+    return known[n];
 
-function getShortScaleName(exp) {
-  if (exp < 3) return "";
+  let parts=[];
 
-  let index = Math.floor(exp / 3) - 1;
+  let group=0;
 
-  if (index < knownNames.length)
-    return knownNames[index];
+  while(n>0){
 
-  return latinIllion(index);
-}
+    let chunk=n%1000;
 
-function getLongScaleName(exp) {
-  if (exp < 6) return "";
+    if(chunk>0){
 
-  let index = Math.floor(exp / 6);
+      let name=units[chunk%10]+
+               tens[Math.floor(chunk/10)%10]+
+               hundreds[Math.floor(chunk/100)%10];
 
-  if (index < knownNames.length)
-    return knownNames[index];
+      let power=thousands[group]||("x"+group);
 
-  return latinIllion(index);
-}
+      parts.unshift(name+power);
 
-function convert() {
+    }
 
-  let input = document.getElementById("numberInput").value.trim();
-  let result = document.getElementById("result");
+    n=Math.floor(n/1000);
+    group++;
 
-  if (!input) {
-    result.innerHTML = "Enter a number.";
-    return;
   }
 
-  let clean = input.replace(/[^0-9]/g, "");
+  return parts.join("")+"illion";
 
-  if (clean.length === 0) {
-    result.innerHTML = "Invalid number.";
-    return;
-  }
+}
 
-  let exponent = clean.length - 1;
-  let sci = "≈ 10^" + exponent;
+function smallName(exp){
 
-  let name;
+  let index=Math.floor(Math.abs(exp)/3);
 
-  if (currentScale === "short")
-    name = getShortScaleName(exponent);
-  else
-    name = getLongScaleName(exponent);
+  if(mode==="simple")
+    return simpleLatin(index);
 
-  if (!name)
-    name = "(number too small for -illion name)";
+  return trueLatin(index);
 
-  result.innerHTML =
-    "<strong>" + name + "</strong>" +
-    "<div class='sci'>" + sci + "</div>";
+}
+
+function calculate(){
+
+  let num=document.getElementById("input").value.replace(/\D/g,'');
+
+  if(num.length===0)return;
+
+  let exp=num.length-1;
+
+  let sci=num[0]+"."+num.slice(1,6)+" × 10^"+exp;
+
+  let name=smallName(exp);
+
+  document.getElementById("result").innerHTML=
+  "<b>Scientific notation:</b><br>"+sci+
+  "<br><br>"+
+  "<b>Name:</b><br>"+name+
+  "<br><br>"+
+  "<div class='small'>10^"+exp+"</div>";
+
 }
 
 </script>
