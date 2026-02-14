@@ -1,22 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Number Engine App</title>
+  <title>Number Engine</title>
 
   <style>
+    :root {
+      --bg: #111827;
+      --sidebar: #1f2937;
+      --text: #ffffff;
+      --button: #3b82f6;
+      --accent: #10b981;
+    }
+
+    body.light {
+      --bg: #f3f4f6;
+      --sidebar: #ffffff;
+      --text: #111827;
+      --button: #2563eb;
+      --accent: #059669;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #111827;
-      color: white;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
+      transition: 0.3s;
     }
-
-    /* Sidebar */
 
     #sidebar {
       width: 250px;
-      background: #1f2937;
+      background: var(--sidebar);
       padding: 20px;
       transition: 0.3s;
       display: flex;
@@ -29,14 +44,10 @@
       overflow: hidden;
     }
 
-    #sidebar h2 {
-      margin-top: 0;
-    }
-
     .menu-button {
       background: none;
       border: none;
-      color: white;
+      color: var(--text);
       padding: 10px;
       text-align: left;
       cursor: pointer;
@@ -45,10 +56,9 @@
     }
 
     .menu-button.active {
-      background: #3b82f6;
+      background: var(--button);
+      color: white;
     }
-
-    /* Main Content */
 
     #main {
       flex: 1;
@@ -62,7 +72,7 @@
       right: 20px;
       cursor: pointer;
       font-size: 18px;
-      background: #374151;
+      background: var(--button);
       border: none;
       color: white;
       padding: 6px 10px;
@@ -71,7 +81,7 @@
 
     input {
       width: 80%;
-      max-width: 500px;
+      max-width: 600px;
       padding: 10px;
       font-size: 18px;
       border-radius: 6px;
@@ -84,7 +94,7 @@
       padding: 10px 18px;
       border-radius: 6px;
       border: none;
-      background: #10b981;
+      background: var(--accent);
       color: white;
       cursor: pointer;
     }
@@ -92,7 +102,8 @@
     #result {
       margin-top: 20px;
       font-size: 18px;
-      line-height: 1.5;
+      line-height: 1.6;
+      word-wrap: break-word;
     }
 
     #historyList {
@@ -101,7 +112,6 @@
       max-height: 400px;
       overflow-y: auto;
     }
-
   </style>
 </head>
 
@@ -109,8 +119,20 @@
 
 <div id="sidebar">
   <h2>Tools</h2>
-  <button class="menu-button active" onclick="showTool('calculator')">Calculator</button>
-  <button class="menu-button" onclick="showTool('history')">History</button>
+
+  <button class="menu-button active" onclick="showTool('calculator')">
+    Calculator
+  </button>
+
+  <button class="menu-button" onclick="showTool('history')">
+    History
+  </button>
+
+  <hr>
+
+  <button class="menu-button" onclick="toggleTheme()">
+    Toggle Theme
+  </button>
 </div>
 
 <div id="main">
@@ -119,14 +141,27 @@
 
   <div id="calculatorTool">
     <h1>Number Name Calculator</h1>
-    <input id="numberInput" placeholder="Enter number..." />
+
+    <input id="numberInput" placeholder="Enter a large number..." />
+
+    <br><br>
+
+    <button class="action" onclick="setScale('short')" id="shortBtn">
+      Short Scale
+    </button>
+
+    <button class="action" onclick="setScale('long')" id="longBtn">
+      Long Scale
+    </button>
+
     <br>
     <button class="action" onclick="calculate()">Calculate</button>
+
     <div id="result"></div>
   </div>
 
   <div id="historyTool" style="display:none;">
-    <h1>Calculation History</h1>
+    <h1>History</h1>
     <div id="historyList"></div>
   </div>
 
@@ -134,13 +169,30 @@
 
 <script>
 
-// Sidebar Toggle
+// ==========================
+// THEME
+// ==========================
+
+(function() {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "light") {
+    document.body.classList.add("light");
+  }
+})();
+
+function toggleTheme() {
+  document.body.classList.toggle("light");
+  const isLight = document.body.classList.contains("light");
+  localStorage.setItem("theme", isLight ? "light" : "dark");
+}
+
+// ==========================
+// SIDEBAR
+// ==========================
 
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("hidden");
 }
-
-// Tool Switching
 
 function showTool(tool) {
 
@@ -163,42 +215,48 @@ function showTool(tool) {
   }
 }
 
-// Number Naming (Basic Short Scale)
+// ==========================
+// SCALE SYSTEM
+// ==========================
+
+let currentScale = "short";
+
+function setScale(scale) {
+  currentScale = scale;
+
+  document.getElementById("shortBtn").style.opacity =
+    scale === "short" ? "1" : "0.6";
+
+  document.getElementById("longBtn").style.opacity =
+    scale === "long" ? "1" : "0.6";
+}
+
+// Known scales
 
 const shortScale = [
   "", "thousand", "million", "billion",
-  "trillion", "quadrillion", "quintillion"
+  "trillion", "quadrillion", "quintillion",
+  "sextillion", "septillion", "octillion",
+  "nonillion", "decillion"
 ];
 
-function calculate() {
+const longScale = [
+  "", "thousand", "million", "milliard",
+  "billion", "billiard", "trillion",
+  "trilliard", "quadrillion"
+];
 
-  let numStr = document.getElementById("numberInput").value;
-  numStr = numStr.replace(/,/g, "").trim();
+// Infinite naming generator
 
-  if (!/^\d+$/.test(numStr)) {
-    document.getElementById("result").innerText = "Invalid number.";
-    return;
+function getName(index) {
+
+  const base = currentScale === "short" ? shortScale : longScale;
+
+  if (index < base.length) {
+    return base[index];
   }
 
-  const groups = [];
-  let temp = numStr;
-
-  while (temp.length > 0) {
-    groups.unshift(temp.slice(-3));
-    temp = temp.slice(0, -3);
-  }
-
-  const highestIndex = groups.length - 1;
-  const highestValue = parseInt(groups[0]);
-
-  function getName(index) {
-
-  if (index < shortScale.length) {
-    return shortScale[index];
-  }
-
-  // Beyond known scale
-  const extraIndex = index - shortScale.length;
+  const extraIndex = index - base.length;
 
   const unitPrefixes = [
     "", "un", "duo", "tri", "quad",
@@ -219,20 +277,68 @@ function calculate() {
   return unitName + tierName + "illion";
 }
 
+// ==========================
+// SCIENTIFIC NOTATION
+// ==========================
 
-  const output = `${highestValue} ${name}`;
-
-  document.getElementById("result").innerText = output;
-
-  saveToHistory(numStr, output);
+function toScientific(numStr) {
+  const length = numStr.length;
+  if (length === 1) return numStr;
+  return `${numStr[0]}.${numStr.slice(1,4)} × 10^${length - 1}`;
 }
 
-// Memory Storage (Local Storage)
+// ==========================
+// MAIN CALCULATION
+// ==========================
+
+function calculate() {
+
+  let numStr = document.getElementById("numberInput").value;
+  numStr = numStr.replace(/,/g, "").trim();
+
+  if (!/^\d+$/.test(numStr)) {
+    document.getElementById("result").innerText = "Invalid number.";
+    return;
+  }
+
+  if (numStr === "0") {
+    document.getElementById("result").innerText = "0";
+    return;
+  }
+
+  const groups = [];
+  let temp = numStr;
+
+  while (temp.length > 0) {
+    groups.unshift(temp.slice(-3));
+    temp = temp.slice(0, -3);
+  }
+
+  const highestIndex = groups.length - 1;
+  const highestValue = parseInt(groups[0]);
+  const decimalPart = groups[1]
+    ? "." + groups[1].padStart(3,"0").slice(0,3)
+    : "";
+
+  const name = getName(highestIndex);
+  const scientific = toScientific(numStr);
+
+  const output =
+    `${highestValue}${decimalPart} ${name}<br><br>` +
+    `Scientific: ${scientific}`;
+
+  document.getElementById("result").innerHTML = output;
+
+  saveToHistory(numStr, `${highestValue}${decimalPart} ${name}`);
+}
+
+// ==========================
+// HISTORY STORAGE
+// ==========================
 
 function saveToHistory(input, result) {
 
   let history = JSON.parse(localStorage.getItem("calcHistory")) || [];
-
   history.unshift({ input, result });
 
   localStorage.setItem("calcHistory", JSON.stringify(history));
@@ -241,7 +347,6 @@ function saveToHistory(input, result) {
 function loadHistory() {
 
   let history = JSON.parse(localStorage.getItem("calcHistory")) || [];
-
   const historyDiv = document.getElementById("historyList");
   historyDiv.innerHTML = "";
 
