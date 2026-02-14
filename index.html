@@ -191,7 +191,34 @@ function calculate() {
   const highestIndex = groups.length - 1;
   const highestValue = parseInt(groups[0]);
 
-  const name = shortScale[highestIndex] || "huge-number";
+  function getName(index) {
+
+  if (index < shortScale.length) {
+    return shortScale[index];
+  }
+
+  // Beyond known scale
+  const extraIndex = index - shortScale.length;
+
+  const unitPrefixes = [
+    "", "un", "duo", "tri", "quad",
+    "quin", "sex", "sept", "oct", "non"
+  ];
+
+  const tierPrefixes = [
+    "zoa", "gon", "qaigen", "suno",
+    "valen", "teron", "luxen", "phyr", "nexon"
+  ];
+
+  const tier = Math.floor(extraIndex / 9);
+  const unit = (extraIndex % 9) + 1;
+
+  const unitName = unitPrefixes[unit];
+  const tierName = tierPrefixes[tier % tierPrefixes.length];
+
+  return unitName + tierName + "illion";
+}
+
 
   const output = `${highestValue} ${name}`;
 
